@@ -343,7 +343,7 @@ DFA NFA2DFA(NFA n) {
 #define CUR (DFA::cur)
 	set<int> clo_s0 = closure({ n.start });
 	//根据NFA状态分别DFA
-	map<set<int>, int> m;//NFA状态转换到DFA 
+	unordered_map<set<int>, int> m;//NFA状态转换到DFA 
 	//map<set<int>, bool> flag;//是否标记
 	DFA s0 = DFA(CUR, clo_s0);
 	m[clo_s0] = CUR;
@@ -363,7 +363,7 @@ DFA NFA2DFA(NFA n) {
 		//标记T
 		//if (flag.find(T) == flag.end()) flag[T] = true;
 		//else continue;
-		cnt++;
+		//cnt++;
 		for (auto a : symbols) {
 			set<int> clo_U = closure(move(T, a));
 			//为空则跳过
@@ -372,15 +372,13 @@ DFA NFA2DFA(NFA n) {
 			}
 			//clo_U没有对应的DFA  那么就要新建一个
 			if (m.find(clo_U) == m.end()) {
+				cnt++;
 				//DFA U(CUR, clo_U);
 				m[clo_U] = CUR;
 				CUR++;
 				//判断U中是否有终结节点
-				for (auto k : clo_U) {
-					if (k == n.end) s0.end.insert(m[clo_U]);
-				}
-				if (clo_U.size() != 0)
-					Dstates.push(clo_U);
+				if(clo_U.find(n.end)!=clo_U.end())s0.end.insert(CUR - 1);
+				Dstates.push(clo_U);
 			}
 			//问题是太多的节点转换到-1节点
 			DFA::Tran[{m[T], a}] = m[clo_U];
